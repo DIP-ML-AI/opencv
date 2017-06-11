@@ -872,7 +872,7 @@ size_t Mat::step1(int i) const
 inline
 bool Mat::empty() const
 {
-    return data == 0 || total() == 0;
+    return data == 0 || total() == 0 || dims == 0;
 }
 
 inline
@@ -1623,6 +1623,15 @@ template<typename _Tp> inline
 void Mat_<_Tp>::create(int _dims, const int* _sz)
 {
     Mat::create(_dims, _sz, DataType<_Tp>::type);
+}
+
+template<typename _Tp> inline
+void Mat_<_Tp>::release()
+{
+    Mat::release();
+#ifdef _DEBUG
+    flags = (flags & ~CV_MAT_TYPE_MASK) | DataType<_Tp>::type;
+#endif
 }
 
 template<typename _Tp> inline
@@ -3730,7 +3739,7 @@ size_t UMat::step1(int i) const
 inline
 bool UMat::empty() const
 {
-    return u == 0 || total() == 0;
+    return u == 0 || total() == 0 || dims == 0;
 }
 
 inline
