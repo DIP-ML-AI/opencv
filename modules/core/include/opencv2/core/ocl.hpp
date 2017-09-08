@@ -248,6 +248,7 @@ public:
     const Device& device(size_t idx) const;
     Program getProg(const ProgramSource& prog,
                     const String& buildopt, String& errmsg);
+    void unloadProg(Program& prog);
 
     static Context& getDefault(bool initialize = true);
     void* ptr() const;
@@ -584,7 +585,6 @@ public:
     Program();
     Program(const ProgramSource& src,
             const String& buildflags, String& errmsg);
-    explicit Program(const String& buf);
     Program(const Program& prog);
 
     Program& operator = (const Program& prog);

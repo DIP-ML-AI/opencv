@@ -2947,9 +2947,9 @@ MatComparator::operator()(const char* expr1, const char* expr2,
     return ::testing::AssertionFailure()
     << "too big relative difference (" << realmaxdiff << " > "
     << maxdiff << ") between "
-    << MatInfo(m1) << " '" << expr1 << "' and '" << expr2 << "' at " << Mat(loc0) << ".\n\n"
-    << "'" << expr1 << "': " << MatPart(m1part, border > 0 ? &loc : 0) << ".\n\n"
-    << "'" << expr2 << "': " << MatPart(m2part, border > 0 ? &loc : 0) << ".\n";
+    << MatInfo(m1) << " '" << expr1 << "' and '" << expr2 << "' at " << Mat(loc0).t() << ".\n"
+    << "- " << expr1 << ":\n" << MatPart(m1part, border > 0 ? &loc : 0) << ".\n"
+    << "- " << expr2 << ":\n" << MatPart(m2part, border > 0 ? &loc : 0) << ".\n";
 }
 
 void printVersionInfo(bool useStdOut)
@@ -3077,6 +3077,16 @@ void printVersionInfo(bool useStdOut)
     const char * tegra_optimization = tegra::useTegra() && tegra::isDeviceSupported() ? "enabled" : "disabled";
     ::testing::Test::RecordProperty("cv_tegra_optimization", tegra_optimization);
     if (useStdOut) std::cout << "Tegra optimization: " << tegra_optimization << std::endl;
+#endif
+
+#ifdef HAVE_IPP
+    const char * ipp_optimization = cv::ipp::useIPP()? "enabled" : "disabled";
+    ::testing::Test::RecordProperty("cv_ipp_optimization", ipp_optimization);
+    if (useStdOut) std::cout << "Intel(R) IPP optimization: " << ipp_optimization << std::endl;
+
+    cv::String ippVer = cv::ipp::getIppVersion();
+    ::testing::Test::RecordProperty("cv_ipp_version", ippVer);
+    if(useStdOut) std::cout << "Intel(R) IPP version: " << ippVer.c_str() << std::endl;
 #endif
 }
 

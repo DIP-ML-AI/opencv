@@ -671,6 +671,13 @@ struct InitializerFunctor5D{
     }
 };
 
+template<typename Pixel>
+struct EmptyFunctor
+{
+    void operator()(const Pixel &, const int *) const {}
+};
+
+
 void Core_ArrayOpTest::run( int /* start_from */)
 {
     int errcount = 0;
@@ -797,6 +804,17 @@ void Core_ArrayOpTest::run( int /* start_from */)
             ts->printf(cvtest::TS::LOG, "forEach is not correct because total is invalid.\n");
             errcount++;
         }
+    }
+
+    // test const cv::Mat::forEach
+    {
+        const Mat a(10, 10, CV_32SC3);
+        Mat b(10, 10, CV_32SC3);
+        const Mat & c = b;
+        a.forEach<Point3i>(EmptyFunctor<Point3i>());
+        b.forEach<Point3i>(EmptyFunctor<const Point3i>());
+        c.forEach<Point3i>(EmptyFunctor<Point3i>());
+        // tests compilation, no runtime check is needed
     }
 
     RNG rng;
@@ -1398,6 +1416,24 @@ TEST(Core_Matx, fromMat_)
     ASSERT_EQ( cvtest::norm(a, b, NORM_INF), 0.);
 }
 
+#ifdef CV_CXX11
+
+TEST(Core_Matx, from_initializer_list)
+{
+    Mat_<double> a = (Mat_<double>(2,2) << 10, 11, 12, 13);
+    Matx22d b = {10, 11, 12, 13};
+    ASSERT_EQ( cvtest::norm(a, b, NORM_INF), 0.);
+}
+
+TEST(Core_Mat, regression_9507)
+{
+    cv::Mat m = Mat::zeros(5, 5, CV_8UC3);
+    cv::Mat m2{m};
+    EXPECT_EQ(25u, m2.total());
+}
+
+#endif // CXX11
+
 TEST(Core_InputArray, empty)
 {
     vector<vector<Point> > data;
@@ -1734,3 +1770,38 @@ TEST(Mat, regression_8680)
    mat.release();
    ASSERT_EQ(mat.channels(), 2);
 }
+
+#ifdef CV_CXX11
+
+TEST(Mat_, range_based_for)
+{
+    Mat_<uchar> img = Mat_<uchar>::zeros(3, 3);
+
+    for(auto& pixel : img)
+    {
+        pixel = 1;
+    }
+
+    Mat_<uchar> ref(3, 3);
+    ref.setTo(Scalar(1));
+    ASSERT_DOUBLE_EQ(norm(img, ref), 0.);
+}
+
+TEST(Mat, from_initializer_list)
+{
+    Mat A({1.f, 2.f, 3.f});
+    Mat_<float> B(3, 1); B << 1, 2, 3;
+
+    ASSERT_EQ(A.type(), CV_32F);
+    ASSERT_DOUBLE_EQ(norm(A, B, NORM_INF), 0.);
+}
+
+TEST(Mat_, from_initializer_list)
+{
+    Mat_<float> A = {1, 2, 3};
+    Mat_<float> B(3, 1); B << 1, 2, 3;
+
+    ASSERT_DOUBLE_EQ(norm(A, B, NORM_INF), 0.);
+}
+
+#endif

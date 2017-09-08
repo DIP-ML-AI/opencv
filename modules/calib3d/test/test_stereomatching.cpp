@@ -560,7 +560,7 @@ int CV_StereoMatchingTest::processStereoMatchingResults( FileStorage& fs, int ca
     {
         absdiff( trueRightDisp, Scalar(params.dispUnknVal), rightUnknMask );
         rightUnknMask = rightUnknMask < numeric_limits<float>::epsilon();
-        assert(leftUnknMask.type() == CV_8UC1);
+        assert(rightUnknMask.type() == CV_8UC1);
     }
 
     // calculate errors
@@ -789,8 +789,11 @@ TEST(Calib3d_StereoSGBM_HH4, regression)
 {
     String path = cvtest::TS::ptr()->get_data_path() + "cv/stereomatching/datasets/teddy/";
     Mat leftImg = imread(path + "im2.png", 0);
+    ASSERT_FALSE(leftImg.empty());
     Mat rightImg = imread(path + "im6.png", 0);
+    ASSERT_FALSE(rightImg.empty());
     Mat testData = imread(path + "disp2_hh4.png",-1);
+    ASSERT_FALSE(testData.empty());
     Mat leftDisp;
     Mat toCheck;
     {
